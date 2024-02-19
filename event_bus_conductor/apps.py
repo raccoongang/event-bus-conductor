@@ -6,11 +6,6 @@ from __future__ import unicode_literals
 
 from django.apps import AppConfig
 
-from openedx.core.djangoapps.plugins.constants import (
-    ProjectType, SettingsType, PluginURLs, PluginSettings
-)
-
-
 EXTENSIONS_APP_NAME = 'event_bus_conductor'
 
 
@@ -23,43 +18,46 @@ class EventBusConductorPluginConfig(AppConfig):
 
     # Class attribute that configures and enables this app as a Plugin App.
     plugin_app = {
-        PluginURLs.CONFIG: {
-            ProjectType.LMS: {
-                PluginURLs.NAMESPACE: EXTENSIONS_APP_NAME,
-                PluginURLs.APP_NAME: EXTENSIONS_APP_NAME,
-                PluginURLs.REGEX: r'^event_bus_conductor/',
-                PluginURLs.RELATIVE_PATH: 'urls',
+        'url_config': {
+            'lms.djangoapp': {
+                'namespace': EXTENSIONS_APP_NAME,
+                'app_name': EXTENSIONS_APP_NAME,
+                'regex': r'^events_inspector/',
+                'relative_path': 'urls',
             },
-            ProjectType.CMS: {
-                PluginURLs.NAMESPACE: EXTENSIONS_APP_NAME,
-                PluginURLs.APP_NAME: EXTENSIONS_APP_NAME,
-                PluginURLs.REGEX: r'^event_bus_conductor/',
-                PluginURLs.RELATIVE_PATH: 'urls',
+            'cms.djangoapp': {
+                'namespace': EXTENSIONS_APP_NAME,
+                'app_name': EXTENSIONS_APP_NAME,
+                'regex': r'^events_inspector/',
+                'relative_path': 'urls',
             }
         },
 
-        PluginSettings.CONFIG: {
-            ProjectType.LMS: {
-                SettingsType.COMMON: {
-                    PluginSettings.RELATIVE_PATH: 'settings.common',
+        'settings_config': {
+            'lms.djangoapp': {
+                'common': {
+                    'relative_path': 'settings.common',
                 },
-                SettingsType.TEST: {
-                    PluginSettings.RELATIVE_PATH: 'settings.test',
+                'test': {
+                    'relative_path': 'settings.test',
                 },
-                SettingsType.PRODUCTION: {
-                    PluginSettings.RELATIVE_PATH: 'settings.production',
+                'production': {
+                    'relative_path': 'settings.production',
                 },
             },
-            ProjectType.CMS: {
-                SettingsType.COMMON: {
-                    PluginSettings.RELATIVE_PATH: 'settings.common',
+            'cms.djangoapp': {
+                'common': {
+                    'relative_path': 'settings.common',
                 },
-                SettingsType.TEST: {
-                    PluginSettings.RELATIVE_PATH: 'settings.test',
+                'test': {
+                    'relative_path': 'settings.test',
                 },
-                SettingsType.PRODUCTION: {
-                    PluginSettings.RELATIVE_PATH: 'settings.production',
+                'production': {
+                    'relative_path': 'settings.production',
                 },
             },
         }
     }
+
+    def ready(self):
+        from .signals import connect_signals_to_listened_events  # pylint: disable=unused-import,import-outside-toplevel
