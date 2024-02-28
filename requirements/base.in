@@ -1,4 +1,3 @@
 # Main requirements of your plugin application.
 -c constraints.txt
-
-django-config-models==2.5.1
+-r package.in

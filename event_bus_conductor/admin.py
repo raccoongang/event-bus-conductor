@@ -1,13 +1,33 @@
 from django.contrib import admin
 
-from .admin_forms import EventConfigurationAdminForm
-from .models import EventConfiguration, Event
+from config_models.admin import ConfigurationModelAdmin
 
-@admin.register(EventConfiguration)
-class EventConfigurationAdmin(admin.ModelAdmin):
-    form = EventConfigurationAdminForm
-    list_display = ('id', 'listened_events', 'change_date', 'changed_by', 'enabled',)
+from .admin_forms import DebugConfigAdminForm
+from .models import DebugConfiguration, DebugEvent
 
-@admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
-    pass
+
+@admin.register(DebugConfiguration)
+class EventConfigurationAdmin(ConfigurationModelAdmin):
+    form = DebugConfigAdminForm
+
+
+@admin.register(DebugEvent)
+class DebugEventAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "uuid",
+        "etype",
+        "created",
+    ]
+
+    list_display_links = [
+        "id",
+        "uuid",
+    ]
+
+    list_filter = [
+        "etype",
+    ]
+
+    def has_change_permission(self, request, obj=None):
+        return False

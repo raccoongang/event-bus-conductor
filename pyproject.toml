@@ -1,0 +1,87 @@
+[build-system]
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+build-backend = "setuptools.build_meta"
+requires = ["setuptools"]
+
+[project]
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+name = "event-bus-conductor"
+authors = [
+    { name = "Kraken", email = "kraken@raccoongang.com" },
+    { name = "Kyrylo Kholodenko", email = "kyrylo.kholodenko@raccoongang.com" },
+    { name = "Volodymyr Bergman", email = "volodymyr.bergman@raccoongang.com" },
+]
+description = "Open edX multi-plugin for event bus signals debugging."
+readme = "README.rst"
+requires-python = ">=3.8"
+keywords = ["event bus", "events", "plugin"]
+license = { file = "LICENSE.txt" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Framework :: Django :: 3",
+]
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+[project.entry-points."lms.djangoapp"]
+event_bus_conductor = "event_bus_conductor.apps:EventBusConductorConfig"
+
+[project.entry-points."cms.djangoapp"]
+event_bus_conductor = "event_bus_conductor.apps:EventBusConductorConfig"
+
+[project.entry-points."credentials.djangoapp"]
+event_bus_conductor = "event_bus_conductor.apps:EventBusConductorConfig"
+
+[project.urls]
+Repository = "https://gitlab.raccoongang.com/kraken/credly-integration/event-bus-conductor.git"
+
+[tool.setuptools]
+packages = ["event_bus_conductor"]
+
+[tool.setuptools.dynamic]
+version = { attr = "event_bus_conductor.__version__" }
+dependencies = { file = "requirements/package.in" }
+
+[tool.ruff]
+# https://docs.astral.sh/ruff/configuration/
+line-length = 120
+exclude = ["migrations"]
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/configuration/
+
+[tool.ruff.lint.per-file-ignores]
+"**/{tests,docs,tools}/*" = ["E402"]
+"event_bus_conductor/admin.py" = ["F403"]
+"event_bus_conductor/models.py" = ["F403"]
+"event_bus_conductor/signals.py" = ["F403"]
+
+[tool.ruff.format]
+# https://docs.astral.sh/ruff/configuration/
+exclude = ["*.pyi"]
+
+[tool.pytest.ini_options]
+# https://docs.pytest.org/en/stable/reference/customize.html
+# https://pytest-cov.readthedocs.io/en/latest/config.html
+# https://pytest-django.readthedocs.io/en/latest/managing_python_path.html
+DJANGO_SETTINGS_MODULE = "event_bus_conductor.settings.test"
+pythonpath = ". event_bus_conductor"
+python_files = "test_*.py"
+addopts = [
+    "-p no:warnings",
+    "--strict-markers",
+    "--no-migrations",
+    "--create-db",
+    "--cov=event_bus_conductor",
+    "--cov-report=term",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+
+[tool.coverage.run]
+# https://coverage.readthedocs.io/en/latest/config.html
+omit = ["*/migrations/*"]

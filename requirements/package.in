@@ -1,0 +1,5 @@
+# Main requirements of your plugin application.
+Django
+django-config-models
+django-extensions
+openedx-events

@@ -1,6 +1,6 @@
 ###############################################
 #
-# Event bus conductor commands.
+# Platform plugin portal commands.
 #
 ###############################################
 
@@ -11,6 +11,8 @@ PROJECT_NAME = event_bus_conductor
 APP_PATH = event_bus_conductor
 
 .DEFAULT_GOAL := help
+
+.PHONY: requirements
 
 
 help:  ## display this help message
@@ -28,39 +30,37 @@ requirements:  ## install environment requirements
 
 upgrade-requirements: export CUSTOM_COMPILE_COMMAND=make upgrade-requirements
 upgrade-requirements:  ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	pip install -qr requirements/pip-tools.txt
-	# Make sure to compile files after any other files they include!
+	# note - on upgrade issues try:
+	# pip install pip==22.0.4
+	# pip install --upgrade pip-tools
+
 	$(PIP_COMPILE) -o requirements/pip-tools.txt requirements/pip-tools.in
+	pip install -qr requirements/pip-tools.txt
+
+	# Make sure to compile files after any other files they include!
 	$(PIP_COMPILE) -o requirements/base.txt requirements/base.in
 	$(PIP_COMPILE) -o requirements/test.txt requirements/test.in
 
-build-test-image:  ## build docker image for testing
-	docker build . -t $(PROJECT_NAME) --target=test-image
+quality-check: clean  ## check coding style (Ruff)
+	ruff check $(APP_PATH)
 
-quality: clean  ## check coding style with pycodestyle and pylint
-	pycodestyle $(APP_PATH)
-	pylint ./$(APP_PATH) --rcfile=./setup.cfg
+quality: clean  ## check coding style (Ruff)
+	ruff check --fix $(APP_PATH)
 
-python-test: clean  ## run pytest for plugin
-	pytest
-	coverage report
-	coverage xml
+format-check: ## show bad formatting (Ruff)
+	ruff format --check $(APP_PATH)
 
-install-npm:  ## install modules from package.json
-	npm install
+format: ## reformat code (Ruff)
+	ruff format $(APP_PATH)
 
-compile-sass: install-npm  ## compile sccs files
-	./node_modules/.bin/gulp build
+bump-check-%: ## check release update effect (bump-my-version)
+	bump-my-version bump -v -n $*
 
-stylelint: install-npm ## check css style with stylelint
-	curl https://raw.githubusercontent.com/raccoongang/frontend/master/.stylelintrc > .stylelintrc
-	./node_modules/.bin/stylelint '$(PROJECT_NAME)/**/*.scss'
+bump-%: ## release new version (bump-my-version)
+	bump-my-version bump $*
 
-#
-# PyPi build and publish
-#
-.build-pypi:
-	python setup.py sdist bdist_wheel
+test-requirements:  ## install testing requirements
+	pip install -r requirements/test.txt
 
-pypi: .build-pypi
-	TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
+test: clean  ## run pytest for plugin
+	pytest -m "not example" $(args)

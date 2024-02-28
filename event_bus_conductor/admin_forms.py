@@ -6,13 +6,14 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from openedx_events.tooling import OpenEdxPublicSignal
 
-from .models import EventConfiguration
+from .models import DebugConfiguration
+from .signals.handlers import handle_configuration_update
 
 
-class EventConfigurationAdminForm(forms.ModelForm):
+class DebugConfigAdminForm(forms.ModelForm):
     class Meta:
-        model = EventConfiguration
-        fields = '__all__'
+        model = DebugConfiguration
+        fields = "__all__"
 
     def clean(self):
         """
@@ -21,9 +22,14 @@ class EventConfigurationAdminForm(forms.ModelForm):
         cleaned_data = super().clean()
 
         try:
-            for event_type in cleaned_data.get('listened_events', {}).get('event_types', []):
+            for event_type in cleaned_data.get("config", {}).get("event_types", []):
                 OpenEdxPublicSignal.get_signal_by_type(event_type)
         except KeyError:
-            raise forms.ValidationError(_(f'Invalid event type: {event_type}'))
+            raise forms.ValidationError(_(f"Invalid event type: {event_type}"))
 
         return cleaned_data
+
+    def save(self, commit=True):
+        new_configuration = super().save(commit=False)
+        handle_configuration_update(new_configuration)
+        return new_configuration

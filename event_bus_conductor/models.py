@@ -1,18 +1,58 @@
-from django.db import models
 from config_models.models import ConfigurationModel
+from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django_extensions.db.models import TimeStampedModel
+from openedx_events.tooling import OpenEdxPublicSignal
 
 
-class EventConfiguration(ConfigurationModel):
-    listened_events = models.JSONField(default={'event_types': []})
+def default_configuration():
+    return {"event_types": []}
+
+
+class DebugConfiguration(ConfigurationModel):
+    config = models.JSONField(
+        default=default_configuration,
+        help_text=_('Use namespaced types, e.g: "org.openedx.learning.student.registration.completed.v1"'),
+    )
+
+    def __str__(self):
+        return f"DebugConfiguration:{self.id}"
 
     @property
-    def events_list(self):
+    def types(self):
         """
         Return the list of event types.
         """
-        return self.listened_events.get('event_types', [])
+        return self.config.get("event_types", [])
+
+    def connect(self, handler):
+        for event_type in self.types:
+            signal = OpenEdxPublicSignal.get_signal_by_type(event_type)
+            signal.connect(handler)
+        return self.types
+
+    def disconnect(self, handler):
+        for event_type in self.types:
+            signal = OpenEdxPublicSignal.get_signal_by_type(event_type)
+            signal.disconnect(handler)
+        return self.types
 
 
-class Event(models.Model):
-    data = models.TextField()
+class DebugEvent(TimeStampedModel):
+    """
+    Public event introspection record.
+    """
+
+    DEFAULT = _("Couldn't parse.")
+
+    uuid = models.UUIDField(null=True, blank=True, help_text=_("Original message ID."))
+    etype = models.CharField(max_length=255, verbose_name="type", help_text=_("Public event type."))
+    data = models.TextField(
+        help_text="https://docs.openedx.org/projects/openedx-events/en/latest/decisions/0003-events-payload.html",
+    )
+    metadata = models.TextField(
+        help_text="https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0041-arch-async-server-event-messaging.html",
+    )
+
+    def __str__(self):
+        return f"Debug Event record:{self.id}({self.created})"
