@@ -12,6 +12,10 @@ def record_event(sender, signal, from_event_bus=False, **kwargs):  # pylint: dis
     if not from_event_bus:
         return
 
+    current_debug_config = DebugConfiguration.current()
+    if not signal.event_type in current_debug_config.types:
+        return
+
     event_uuid = None
     event_type = DebugEvent.DEFAULT
     event_metadata = DebugEvent.DEFAULT
@@ -32,25 +36,3 @@ def record_event(sender, signal, from_event_bus=False, **kwargs):  # pylint: dis
             data=pformat(event_data),
             metadata=pformat(event_metadata),
         )
-
-
-def handle_configuration_update(new_debug_configuration):
-    """
-    Update subscriptions if needed.
-    """
-    current_debug_config = DebugConfiguration.current()
-
-    # nothing has changed:
-    if new_debug_configuration.fields_equal(current_debug_config):
-        return
-
-    # respect configuration switch:
-    if not new_debug_configuration.enabled:
-        current_debug_config.disconnect(record_event)
-        logger.info("Conductor: All clear! I'm quitting now.")
-        return
-
-    # subscribe for currently set events:
-    connected_event_types = new_debug_configuration.connect(record_event)
-    if connected_event_types:
-        logger.info("Conductor: Ok! Now I'm interested in these: %s", connected_event_types)

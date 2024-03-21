@@ -7,7 +7,6 @@ from django.utils.translation import gettext_lazy as _
 from openedx_events.tooling import OpenEdxPublicSignal
 
 from .models import DebugConfiguration
-from .signals.handlers import handle_configuration_update
 
 
 class DebugConfigAdminForm(forms.ModelForm):
@@ -28,8 +27,3 @@ class DebugConfigAdminForm(forms.ModelForm):
             raise forms.ValidationError(_(f"Invalid event type: {event_type}"))
 
         return cleaned_data
-
-    def save(self, commit=True):
-        new_configuration = super().save(commit=False)
-        handle_configuration_update(new_configuration)
-        return new_configuration

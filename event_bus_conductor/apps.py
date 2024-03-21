@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import logging
 
 from django.apps import AppConfig
-from openedx_events.tooling import load_all_signals
+from openedx_events.tooling import load_all_signals, OpenEdxPublicSignal
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +82,13 @@ class EventBusConductorConfig(AppConfig):
     }
 
     def ready(self):
+        from .signals.handlers import record_event
         logger.info("Conductor: Hello everyone! Please, prepare your tickets!")
 
         # ensure signals are cached:
         load_all_signals()
+
+        for event in OpenEdxPublicSignal.all_events():
+            event.connect(record_event)
 
         return super().ready()

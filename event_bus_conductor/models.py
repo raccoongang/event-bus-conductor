@@ -25,18 +25,6 @@ class DebugConfiguration(ConfigurationModel):
         """
         return self.config.get("event_types", [])
 
-    def connect(self, handler):
-        for event_type in self.types:
-            signal = OpenEdxPublicSignal.get_signal_by_type(event_type)
-            signal.connect(handler)
-        return self.types
-
-    def disconnect(self, handler):
-        for event_type in self.types:
-            signal = OpenEdxPublicSignal.get_signal_by_type(event_type)
-            signal.disconnect(handler)
-        return self.types
-
 
 class DebugEvent(TimeStampedModel):
     """
