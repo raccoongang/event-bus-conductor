@@ -5,9 +5,10 @@ App configuration for event_bus_conductor.
 from __future__ import unicode_literals
 
 import logging
+from pprint import pformat
 
 from django.apps import AppConfig
-from openedx_events.tooling import load_all_signals, OpenEdxPublicSignal
+from openedx_events.tooling import OpenEdxPublicSignal, load_all_signals
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,9 @@ class EventBusConductorConfig(AppConfig):
         # ensure signals are cached:
         load_all_signals()
 
-        for event in OpenEdxPublicSignal.all_events():
+        all_events = OpenEdxPublicSignal.all_events()
+        for event in all_events:
             event.connect(record_event)
 
+        logger.debug(f"Conductor: subscribed to: {pformat(all_events)}")
         return super().ready()
