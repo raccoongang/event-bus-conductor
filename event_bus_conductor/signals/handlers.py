@@ -13,7 +13,7 @@ def record_event(sender, signal, from_event_bus=False, **kwargs):  # pylint: dis
         return
 
     current_debug_config = DebugConfiguration.current()
-    if not signal.event_type in current_debug_config.types:
+    if signal.event_type not in current_debug_config.types:
         return
 
     event_uuid = None

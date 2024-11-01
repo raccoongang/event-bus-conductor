@@ -31,8 +31,8 @@ requirements:  ## install environment requirements
 upgrade-requirements: export CUSTOM_COMPILE_COMMAND=make upgrade-requirements
 upgrade-requirements:  ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
 	# note - on upgrade issues try:
-	# pip install pip==22.0.4
-	# pip install --upgrade pip-tools
+	pip install pip==22.0.4
+	pip install --upgrade pip-tools
 
 	$(PIP_COMPILE) -o requirements/pip-tools.txt requirements/pip-tools.in
 	pip install -qr requirements/pip-tools.txt

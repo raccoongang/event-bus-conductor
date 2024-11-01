@@ -19,7 +19,7 @@ services:
 base:
   stage: prepare
   before_script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     - docker build -t $BASE_IMAGE --target=base .
     - docker push $BASE_IMAGE
@@ -36,8 +36,6 @@ tester:
   stage: create
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $BASE_IMAGE || true
-    - docker pull $TESTER_IMAGE || true
   script:
     - docker build --cache-from $BASE_IMAGE --cache-from $TESTER_IMAGE -t $TESTER_IMAGE --target=tester .
     - docker push $TESTER_IMAGE

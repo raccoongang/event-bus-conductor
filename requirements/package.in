@@ -3,3 +3,4 @@ Django
 django-config-models
 django-extensions
 openedx-events
+edx-toggles
