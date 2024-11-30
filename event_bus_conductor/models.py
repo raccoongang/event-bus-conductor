@@ -5,6 +5,9 @@ from django_extensions.db.models import TimeStampedModel
 
 
 def default_configuration():
+    """
+    Initial configuration JSON.
+    """
     return {"event_types": []}
 
 
@@ -20,7 +23,7 @@ class DebugConfiguration(ConfigurationModel):
     @property
     def types(self):
         """
-        Return the list of event types.
+        Returns the list of event types.
         """
         return self.config.get("event_types", [])
 

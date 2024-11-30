@@ -81,15 +81,15 @@ class EventBusConductorConfig(AppConfig):
     }
 
     def ready(self):
-        from pprint import pformat
-        from openedx_events.tooling import OpenEdxPublicSignal, load_all_signals
-
-        from .signals.handlers import record_event
-        from .toggles import EVENT_BUS_CONDUCTOR_ENABLED
+        from event_bus_conductor.toggles import EVENT_BUS_CONDUCTOR_ENABLED
 
         if not EVENT_BUS_CONDUCTOR_ENABLED.is_enabled():
             logger.info("Conductor: ...is sleeping next to the driver (settings.EVENT_BUS_CONDUCTOR_ENABLED)")
             return
+
+        from pprint import pformat
+        from openedx_events.tooling import OpenEdxPublicSignal, load_all_signals
+        from event_bus_conductor.signals.handlers import record_event
 
         logger.info("Conductor: Hello everyone! Please, prepare your tickets!")
 
